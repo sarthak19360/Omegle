@@ -1,0 +1,13 @@
+.video-section {
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#localVideo {
+  border: 2px solid black;
+  width: 640px;
+  height: 480px;
+  background-color: black;
+}
