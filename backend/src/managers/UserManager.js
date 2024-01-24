@@ -1,4 +1,4 @@
-import RoomManager from "./RoomManager";
+import RoomManager from "./RoomManager.js";
 
 const UserManager = class {
   #users; // an array of users(name,socket)
@@ -16,11 +16,13 @@ const UserManager = class {
       socket,
     });
     this.#queue.push(socket.id);
+    socket.send("lobby");
     this.clearQueue();
     this.initHandler(socket);
   }
 
   removeUser(socketId) {
+    const user = this.#users.find((x) => x.socket.if === socketId);
     this.#users = this.#users.filter((x) => x.socket.id !== socketId);
     this.#queue = this.#queue.filter((x) => x === socketId);
   }
@@ -37,7 +39,9 @@ const UserManager = class {
     if (!user1 || !user2) {
       return;
     }
+    console.log("creating room");
     const room = this.#roomManager.createRoom(user1, user2);
+    this.clearQueue();
   }
 
   initHandler(socket) {

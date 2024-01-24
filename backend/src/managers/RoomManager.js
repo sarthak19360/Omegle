@@ -19,15 +19,17 @@ const RoomManager = class {
   }
 
   onOffer(roomId, sdp) {
-    const user2 = this.#rooms.get(roomId).user2;
+    const user2 = this.#rooms.get(roomId.toString())?.user2;
+    console.log("user2 is " + user2);
     user2.socket.emit("offer", {
       sdp,
       roomId,
     });
   }
 
-  onAnswer(roomId) {
-    const user1 = this.#rooms.get(roomId).user1;
+  onAnswer(roomId, sdp) {
+    const user1 = this.#rooms.get(roomId.toString())?.user1;
+    console.log("user1 is " + user1);
     user1.socket.emit("answer", {
       sdp,
       roomId,

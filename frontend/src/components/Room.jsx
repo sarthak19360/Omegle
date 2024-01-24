@@ -1,58 +1,57 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { Socket, io } from "socket.io-client";
+
+const URL = "http://localhost:3000";
 
 const Room = () => {
-  const [toggleVideo, setToggleVideo] = useState(false);
-  const videoRef = useRef(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const name = searchParams.get("name");
-
-  const playVideoFromCamera = async () => {
-    try {
-      const constraints = {
-        video: {
-          width: 640,
-          height: 480,
-        },
-      };
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      videoRef.current.srcObject = stream;
-    } catch (error) {
-      console.error("Error opening video camera.", error);
-    }
-  };
-
-  const stopStreamedVideo = async () => {
-    try {
-      const stream = await videoRef.current.srcObject;
-      const tracks = stream.getTracks();
-
-      tracks.forEach((track) => {
-        track.stop();
-      });
-
-      videoRef.current.srcObject = null;
-    } catch (error) {
-      console.error("Error closing video camera.", error);
-    }
-  };
+  const [socket, setSocket] = useState(null);
+  const [lobby, setLobby] = useState(true);
 
   useEffect(() => {
-    playVideoFromCamera();
-  }, []);
+    const socket = io(URL);
+
+    socket.on("send-offer", ({ roomId }) => {
+      alert("send offer please");
+      setLobby(false);
+      socket.emit("offer", {
+        sdp: "",
+        roomId,
+      });
+    });
+
+    socket.on("offer", ({ roomId, sdp }) => {
+      alert("send answer please");
+      setLobby(false);
+      socket.emit("answer", {
+        roomId,
+        sdp: "",
+      });
+    });
+
+    socket.on("answer", ({ roomId, answer }) => {
+      setLobby(false);
+      alert("connection done");
+    });
+
+    socket.on("lobby", () => {
+      setLobby(true);
+    });
+
+    setSocket(socket);
+  }, [name]);
+
+  if (lobby) {
+    return <div>Waiting to connect you to someone</div>;
+  }
 
   return (
-    <div className="video-section">
-      <div>Hi {name}</div>
-      <video id="localVideo" ref={videoRef} autoPlay playsInline={false} />
-      <button
-        onClick={() => {
-          toggleVideo ? playVideoFromCamera() : stopStreamedVideo();
-          setToggleVideo(!toggleVideo);
-        }}
-      >
-        {toggleVideo ? "Open Camera" : "Close Camera"}
-      </button>
+    <div>
+      Hi {name}
+      <video width={400} height={400} />
+      <video width={400} height={400} />
     </div>
   );
 };
